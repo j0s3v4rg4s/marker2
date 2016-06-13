@@ -9,8 +9,10 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 var core_1 = require('@angular/core');
+var detalle_service_1 = require('./services/detalle/detalle.service');
 var GoogleMapComponent = (function () {
-    function GoogleMapComponent() {
+    function GoogleMapComponent(_detalleService) {
+        this._detalleService = _detalleService;
     }
     GoogleMapComponent.prototype.ngOnInit = function () {
         this.loadMap();
@@ -24,8 +26,18 @@ var GoogleMapComponent = (function () {
         this.miEvento();
     };
     GoogleMapComponent.prototype.miEvento = function () {
+        var _this = this;
         this.map.addListener('click', function (event) {
-            document.getElementById("content").innerHTML = "whatever";
+            var localitation = new google.maps.LatLng(event.latLng.lat(), event.latLng.lng());
+            var geocoder = new google.maps.Geocoder();
+            geocoder.geocode({ 'location': localitation }, function (result, status) {
+                if (status === google.maps.GeocoderStatus.OK) {
+                    _this._detalleService.getMap(result[0].address_components).then(function (mapas) {
+                        var arr = Object.keys(mapas).map(function (k) { return mapas[k]; });
+                        console.log(arr);
+                    });
+                }
+            });
         });
     };
     GoogleMapComponent.prototype.post = function () {
@@ -35,9 +47,10 @@ var GoogleMapComponent = (function () {
         core_1.Component({
             selector: 'app',
             styleUrls: ['app/app.css'],
-            templateUrl: 'app/app.html'
+            templateUrl: 'app/app.html',
+            providers: [detalle_service_1.DetalleService]
         }), 
-        __metadata('design:paramtypes', [])
+        __metadata('design:paramtypes', [detalle_service_1.DetalleService])
     ], GoogleMapComponent);
     return GoogleMapComponent;
 }());
